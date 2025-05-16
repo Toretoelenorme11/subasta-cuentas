@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Subasta de Cuentas Recuperadas - SOLUCIONES AL INSTANTE</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; color: #333; margin: 0; padding: 20px; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1, h2 { text-align: center; color: #2c3e50; margin: 0 0 15px; }
+    .empresa { font-size: 1.5em; font-weight: bold; margin-bottom: 10px; color: #2980b9; text-align:center;}
+    .cuenta { border-bottom: 1px solid #ddd; padding: 15px 0; display: flex; justify-content: space-between; align-items: flex-start; }
+    .datos { max-width: 60%; }
+    .saldo { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; }
+    .pago { color: #27ae60; margin-bottom: 5px; }
+    .reembolso { color: #2980b9; margin-bottom: 5px; }
+    .ofertas, .interesados, .visitas { font-weight: bold; margin-bottom: 5px; }
+    button.oferta-btn {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: background-color 0.3s ease;
+      margin-top: 5px;
+      height: fit-content;
+    }
+    button.oferta-btn:hover:enabled {
+      background-color: #2980b9;
+    }
+    button.oferta-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    ul.ofertas-list {
+      list-style: disc inside;
+      padding-left: 15px;
+      margin: 5px 0 10px;
+      color: #555;
+      max-width: 300px;
+      max-height: 100px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #fafafa;
+    }
+    .timer { font-size: 1.2em; font-weight: bold; color: red; text-align: center; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="empresa">SOLUCIONES AL INSTANTE</div>
+    <h1>Subasta de Cuentas Recuperadas</h1>
+
+    <div id="visitas" class="visitas" style="text-align:center; margin-bottom: 20px;">
+      Visitas a esta página: <span id="contadorVisitas">0</span>
+    </div>
+
+    <div class="cuenta" id="cuenta1">
+      <div class="datos">
+        <p class="saldo">Cuenta: $22,500</p>
+        <p class="pago">Pago: $7,100</p>
+        <p class="reembolso">Reembolso: 70%</p>
+        <p class="ofertas">Ofertas realizadas: <span class="contador">3</span></p>
+        <p class="interesados">Interesados: <span class="contadorInteresados">5</span> <button onclick="incrementInterested('cuenta1')" style="font-size:0.8em; padding:2px 5px; margin-left: 5px;">Me interesa</button></p>
+        <ul class="ofertas-list" id="listaOfertas_cuenta1">
+          <li>$6,500</li>
+          <li>$6,800</li>
+          <li>$7,000</li>
+        </ul>
+      </div>
+      <button class="oferta-btn" onclick="hacerOferta('cuenta1')" id="btn_cuenta1">Hacer Oferta</button>
+    </div>
+
+    <div class="cuenta" id="cuenta2">
+      <div class="datos">
+        <p class="saldo">Cuenta: $15,000</p>
+        <p class="pago">$4,500</p>
+        <p class="reembolso">Reembolso: 65%</p>
+        <p class="ofertas">Ofertas realizadas: <span class="contador">2</span></p>
+        <p class="interesados">Interesados: <span class="contadorInteresados">3</span> <button onclick="incrementInterested('cuenta2')" style="font-size:0.8em; padding:2px 5px; margin-left: 5px;">Me interesa</button></p>
+        <ul class="ofertas-list" id="listaOfertas_cuenta2">
+          <li>$4,100</li>
+          <li>$4,300</li>
+        </ul>
+      </div>
+      <button class="oferta-btn" onclick="hacerOferta('cuenta2')" id="btn_cuenta2">Hacer Oferta</button>
+    </div>
+
+    <div class="cuenta" id="cuenta3">
+      <div class="datos">
+        <p class="saldo">Cuenta: $9,300</p>
+        <p class="pago">$2,300</p>
+        <p class="reembolso">Reembolso: 60%</p>
+        <p class="ofertas">Ofertas realizadas: <span class="contador">1</span></p>
+        <p class="interesados">Interesados: <span class="contadorInteresados">1</span> <button onclick="incrementInterested('cuenta3')" style="font-size:0.8em; padding:2px 5px; margin-left: 5px;">Me interesa</button></p>
+        <ul class="ofertas-list" id="listaOfertas_cuenta3">
+          <li>$2,100</li>
+        </ul>
+      </div>
+      <button class="oferta-btn" onclick="hacerOferta('cuenta3')" id="btn_cuenta3">Hacer Oferta</button>
+    </div>
+
+    <div class="timer">
+      Tiempo límite para ofertar: <span id="countdown"></span>
+    </div>
+  </div>
+
+  <script>
+    // Contador de visitas simple (local, por sesión)
+    let visitasCount = sessionStorage.getItem('visitasCount') || 0;
+    visitasCount++;
+    sessionStorage.setItem('visitasCount', visitasCount);
+    document.getElementById('contadorVisitas').textContent = visitasCount;
+
+    // Countdown para las 6PM
+    function countdownToSixPM() {
+      const now = new Date();
+      const sixPM = new Date();
+      sixPM.setHours(18, 0, 0, 0);
+      if (now > sixPM) sixPM.setDate(sixPM.getDate() + 1);
+      const diff = sixPM - now;
+      const hours = Math.floor(diff / 1000 / 60 / 60);
+      const minutes = Math.floor((diff / 1000 / 60) % 60);
+      const seconds = Math.floor((diff / 1000) % 60);
+      document.getElementById('countdown').textContent = `${hours}h ${minutes}m ${seconds}s`;
+
+      // Desactivar botones si pasó el tiempo
+      const buttons = document.querySelectorAll("button.oferta-btn");
+      const interesadosBtns = document.querySelectorAll(".interesados button");
+      if (now >= sixPM) {
+        buttons.forEach(btn => {
+          btn.disabled = true;
+          btn.textContent = "Tiempo terminado";
+        });
+        interesadosBtns.forEach(btn => btn.disabled = true);
+      } else {
+        buttons.forEach(btn => {
+          btn.disabled = false;
+          btn.textContent = "Hacer Oferta";
+        });
+        interesadosBtns.forEach(btn => btn.disabled = false);
+      }
+    }
+    setInterval(countdownToSixPM, 1000);
+    countdownToSixPM();
+
+    // Incrementar interesados
+    function incrementInterested(cuentaId) {
+      const cuenta = document.getElementById(cuentaId);
+      const interesadosSpan = cuenta.querySelector('.contadorInteresados');
+
+      let count = parseInt(interesadosSpan.textContent);
+      count++;
+      interesadosSpan.textContent = count;
+    }
+
+    // Función para hacer oferta con selección de monto
+    function hacerOferta(cuentaId) {
+      const opciones = [1000,2000,3000,4000,5000,6000,7000];
+      let opcionesTexto = "Elige un monto para ofertar:\n";
+      opciones.forEach((monto, i) => {
+        opcionesTexto += `${i+1}. $${monto}\n`;
+      });
+      let seleccion = prompt(opcionesTexto, "1");
+      if (!seleccion) return; // Canceló prompt
+
+      const index = parseInt(seleccion) - 1;
+      if (index < 0 || index >= opciones.length || isNaN(index)) {
+        alert("Selección inválida.");
+        return;
+      }
+
+      const montoOferta = opciones[index];
+      const cuenta = document.getElementById(cuentaId);
+      const contadorSpan = cuenta.querySelector('.contador');
+      const listaOfertas = cuenta.querySelector('.ofertas-list');
+
+      // Actualizar contador
+      let count = parseInt(contadorSpan.textContent);
+      count++;
+      contadorSpan.textContent = count;
+
+      // Añadir oferta a la lista
+      const ofertaNueva = document.createElement('li');
+      ofertaNueva.textContent = "$" + montoOferta;
+      listaOfertas.appendChild(ofertaNueva);
+    }
+  </script>
+</body>
+</html>
+
